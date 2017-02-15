@@ -23,11 +23,31 @@ template_dir = os.path.join(os.path.dirname(__file__), "templates")
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                autoescape= True)
 
+class Posts(db.Model):
+    title = db.StringProperty(required=True)
+    body = db.TextProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add= True)
+
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        self.response.write('Hello world!')
+        t = jinja_env.get_template("frontpage.html")
+        content = t.render(
+            title = "",
+            body = "",
+            error = self.request.get("error"))
+        self.response.write(content)
 
+#TODO: Handler for '/blog'.
+# The /blog route displays the 5 most recent posts. To limit the displayed posts in this way, you'll need to filter the query results.
+
+#TODO: Handler for '/newpost'
+#After submitting a new post, your app displays the main blog page.
+# Note that, as with the AsciiChan example, you will likely need to refresh the main blog page to see your new post listed.
+
+#TODO: Check for blank title and/or body
+# If either title or body is left empty in the new post form, the form is rendered again, with a helpful error message
+# and any previously-entered content in the same form inputs.
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
 ], debug=True)
