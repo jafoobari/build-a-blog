@@ -30,13 +30,31 @@ class Posts(db.Model):
 
 
 class MainHandler(webapp2.RequestHandler):
-    def get(self):
+    def get(self, *a, **kw):
+        posts = db.GqlQuery("SELECT * FROM Posts ORDER BY created DESC LIMIT 5")
         t = jinja_env.get_template("frontpage.html")
         content = t.render(
             title = "",
             body = "",
-            error = self.request.get("error"))
+            error = self.request.get("error"),
+            posts = posts)
         self.response.write(content)
+
+    def post(self):
+        title = self.request.get("title")
+        body = self.request.get("body")
+
+        if title and body:
+            post = Posts(title = title, body = body)
+            post.put()
+        #put in a redirect to to the frontpage here
+            #once this gets moved to the newpost handler
+            confirmation = "Your post has been added to the blog. Add another!"
+            self.redirect("/?error=" + confirmation)
+        else:
+            error = "Please insert both a title and body for your blog post."
+            self.redirect("/?error=" + error)
+
 
 #TODO: Handler for '/blog'.
 # The /blog route displays the 5 most recent posts. To limit the displayed posts in this way, you'll need to filter the query results.
