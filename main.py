@@ -59,7 +59,7 @@ class NewPostHandler(webapp2.RequestHandler):
             error = "Please insert both a title and body for your blog post."
             t = jinja_env.get_template("new-post.html")
             content = t.render(
-                title = self.request.get("title"),  # TODO: See next TODO
+                title = self.request.get("title"),
                 body = self.request.get("body"),
                 error = error)
             self.response.write(content)
@@ -76,7 +76,7 @@ class ViewPostHandler(webapp2.RequestHandler):
 
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler), #TODO: See if better way to "re-route"
+    ('/', MainHandler),
     ('/blog', MainHandler),
     ('/new-post', NewPostHandler),
     webapp2.Route('/blog/<id:\d+>', ViewPostHandler)
