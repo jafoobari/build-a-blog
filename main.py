@@ -42,9 +42,9 @@ class NewPostHandler(webapp2.RequestHandler):
     def get(self):
         t = jinja_env.get_template("new-post.html")
         content = t.render(
-            title = self.request.get("title"),#TODO: See next TODO
+            title = self.request.get("title"),
             body = self.request.get("body"),
-            error = self.request.get("error"))
+            error = "")
         self.response.write(content)
 
     def post(self):
@@ -54,11 +54,23 @@ class NewPostHandler(webapp2.RequestHandler):
         if title and body:
             post = Posts(title=title, body=body)
             post.put()
-            self.redirect("/blog")
+            self.redirect("/blog/{}".format(post.key().id()))
         else:
             error = "Please insert both a title and body for your blog post."
-            self.redirect("/new-post?error=" + error + "&title=" + title + "&body=" + body)
-            #TODO: Fix this in instance of multiple incomplete entries. Currently will not keep text from subsequent incompletelte entries.
+            t = jinja_env.get_template("new-post.html")
+            content = t.render(
+                title = self.request.get("title"),  # TODO: See next TODO
+                body = self.request.get("body"),
+                error = error)
+            self.response.write(content)
+
+class ViewPostHandler(webapp2.RequestHandler):
+    def get(self, id):
+        post = Posts.get_by_id(int(id))
+        t = jinja_env.get_template("post.html")
+        content = t.render(post = post)
+        self.response.write(content)
+
 
 
 
@@ -66,5 +78,6 @@ class NewPostHandler(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     ('/', MainHandler), #TODO: See if better way to "re-route"
     ('/blog', MainHandler),
-    ('/new-post', NewPostHandler)
+    ('/new-post', NewPostHandler),
+    webapp2.Route('/blog/<id:\d+>', ViewPostHandler)
 ], debug=True)
